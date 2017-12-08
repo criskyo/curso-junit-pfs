@@ -44,5 +44,13 @@ public class SubastaController {
 		return DEFAULT;
 	}
 
+	public SubastaApi getSubastaApi() {
+		return subastaApi;
+	}
+
+	public void setSubastaApi(SubastaApi subastaApi) {
+		this.subastaApi = subastaApi;
+	}
+
 	
 }
