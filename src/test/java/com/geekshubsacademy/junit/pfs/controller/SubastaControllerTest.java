@@ -1,4 +1,4 @@
-package com.geekshubsacademy.junit.pfs;
+package com.geekshubsacademy.junit.pfs.controller;
 
 import static org.junit.Assert.*;
 
@@ -8,6 +8,7 @@ import org.springframework.ui.ModelMap;
 
 import com.geekshubsacademy.junit.pfs.controller.SubastaApi;
 import com.geekshubsacademy.junit.pfs.controller.SubastaController;
+
 import static org.mockito.Mockito.*;
 
 public class SubastaControllerTest {

@@ -1,5 +1,8 @@
 package com.geekshubsacademy.junit.pfs.controller;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class SubastaApi {
 
 	public static final String ACCION_AGREGAR_BIEN = "ACCION_AGREGAR_BIEN";

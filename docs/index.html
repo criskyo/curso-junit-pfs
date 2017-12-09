@@ -73,6 +73,7 @@ class: center, middle
 background-image: url(imgs/bg.jpg)
 
 # Curso de JUnit, Jacoco y Mockito
+## Práctica en PFS
 .footer.left[
 Mariano Eloy Fernández Osca
   .orange[
@@ -82,1087 +83,154 @@ Mariano Eloy Fernández Osca
 ---
 layout: true
 background-image: url(imgs/bg.jpg)
-
 ---
-# Contenido: Resumen
+# Qué vamos a hacer en el curso
 .toc[
-1. Testing
-2. JUnit
-3. Jacoco
-4. Mockito
-5. TDD: Test driven Development
-6. Retos
+- Testear 2 clases:
+  - SubastaController
+  - SubastaManager
+- Crear tests unitarios y de integración.
+- Refactorizar
+- Configurar JaCoCo
 ]
 ---
-# 1. Testing
-.toc[
-  - Qué es Software Testing?
-    - Modelo: SUT, Parametros, Dependencias
-    - ¿Quién prueba que el test es correcto?
-  - Caja negra, caja blanca
-      - PROs y CONs
-      - Caja blanca + Mocks
-      - Falacias de caja blanca
-  - Granularidad: Unitarios, Integración, Aceptación
-  - Test vs Code
-]
----
-# 2. JUnit
-.toc[
-  - Test: Hola Mundo
-  - @Test, @Before, ...
-  - Assertions
-    - JUnit
-    - Hamcrest
-]
----
-# 3. Jacoco
-.toc[
-  - Qué es cobertura de código y por qué la quiero
-  - Integración continua
-  - Ejecución con Maven
-]
----
-# 4. Mockito
-.toc[
-  - Mocks
-  - Spies
-  - Argument Captors
-]
----
-# 5. TDD
-.toc[
-  - Filosofía del TDD
-  - Técnica
-  - Implicaciones
-]
----
-# 6. Retos
-.toc[
-  - Testing + Refactoring
-  - TDD: Sudoku
-]
----
-# Qué es un test
-
-# "Código que prueba **_automáticamente_** el correcto funcionamiento de otro código"
-
----
-# Cuestiones filosóficas
-.center[
-![](imgs/philosoraptor.png)
-]
----
-![](imgs/watchmen.png)
----
-
-# Ejemplo: Test en JUnit
+# SubastaController
+https://gist.github.com/mefernandez/88db27e61f666feb8117b87c3cea9762
 
 ```java
-public class Test {
+@Controller
+public class SubastaController {
 
-  @Test
-  public void test() {
-    int resultado = suma(1,2);
-    assertEquals(3, resultado);
-  }
+	private static final String DEFAULT = "default";
 
-  public int suma(int a, int b) {
-    return a+b;
-  }
-}
-```
+	@Autowired
+	private ApiProxyFactory proxyFactory;
 
----
+	@Autowired
+	private SubastaApi subastaApi;
 
-# Estructura de un Test (AAA)
+	@Autowired
+	private SubastaManager subastaManager;
 
-- Arrange (Preparar)
-- Act (Probar)
-- Assert (Verificar)
+	@Autowired
+	private NMBProjectContext nmbProjectContext;
 
-```java
-public class MiTest {
+...
 
-	@Test
-	public void test() {
-		// Preparar
-		String pattern = "dd/MM/yyyy";
-		SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-		Calendar calendario = Calendar.getInstance();
-*		calendario.set(2017, 8, 15);
+	@SuppressWarnings("static-access")
+	@RequestMapping
+	public String guardarAgregarExcluirBien(
+			@RequestParam(value = "idSubasta", required = true) Long idSubasta,
+			@RequestParam(value = "idsBien", required = true) String idsBien,
+			@RequestParam(value = "lotes", required = false) String lotes,
+			@RequestParam(value = "accion", required = true) String accion,
+			ModelMap map) {
 
-		// Probar
-		String fechaConFormato = dateFormat.format(calendario.getTime());
-
-		// Verificar
-		assertEquals("15/09/2017", fechaConFormato);
-	}
-
-}
-```
----
-# Demo
-
-# Eclipse + Maven + JUnit
-
-http://www.eclipse.org/
-
-https://maven.apache.org/guides/getting-started/index.html
-
-http://junit.org/junit4/
-
----
-# Maven
-`pom.xml`
-```xml
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.geekshubsacademy</groupId>
-  <artifactId>curso-junit</artifactId>
-  <packaging>jar</packaging>
-  <version>1.0.0-SNAPSHOT</version>
-  <name>Curso de JUnit</name>
-  <url>http://geekshubsacademy.com</url>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-</project>
-```
----
-# Eclipse
-.center[
-![](imgs/eclipse-import-maven-project.png)
-]
----
-#JUnit
-Para ejecutar JUnit desde Eclipse:
-
-Sobre la clase de Test --> click derecho --> Run As --> JUnit
-.center[
-![](imgs/eclipse-run-junit.png)
-]
----
-#JUnit
-Resultados:
-- Rojo: Se ha producido una **excepcion** al ejecutar el código
-- Azul: El test no ha satisfecho las expectativas
-- Verde: El test ha pasado OK.
-
-.center[
-![](imgs/eclipse-junit-resultados.png)
-]
----
-# @Anotaciones de JUnit
-## Ciclo de Vida de un Test
-- @BeforeClass
-- @Before
-- @Test
-- @After
-- @AfterClass
-- @Ignore
-
----
-# Demo: Ciclo de Vida
-.medium[
-```java
-public class CicloVidaTest {
-
-	private static String ciclo = "";
-
-	@BeforeClass
-	public static void beforeClass() {
-		ciclo += "@BeforeClass";
-		assertEquals("@BeforeClass", ciclo);
-	}
-
-	@Before
-	public void before() {
-		ciclo += " @Before";
-		assertEquals("@BeforeClass @Before", ciclo);
-	}
-
-	@Test
-	public void test() {
-		ciclo += " @Test 1";
-		assertEquals("@BeforeClass @Before @Test 1", ciclo);
-	}
-
-	@After
-	public void after() {
-		ciclo += " @After";
-		assertEquals("@BeforeClass @Before @Test 1 @After", ciclo);
-	}
-
-	@AfterClass
-	public static void afterClass() {
-		ciclo += " @AfterClass";
-		assertEquals("@BeforeClass @Before @Test 1 @After @AfterClass", ciclo);
-	}
-
-}
-```
-]
----
-# Ejercicio:
-En el proyecto de Eclipse hay una clase ValidadorEmail.
-Sospechamos que funciona mal.
-## Objetivo
-"Escribe una clase con varios @Test para la clase ValidadorEmail.
- Algunos tests fallarán (azul),
- pero en ningún caso deberían arrojar una Excepción (rojo)."
-
- Consejo: Usa las anotaciones del ciclo de vida.
----
-# Cuestiones Filosóficas II
-.center[
-![](imgs/philosoraptor-3.jpg)
-]
----
-# Motivos frecuentes para no testear
-
-1. A veces es complicado testear el código existente
-2. Tengo prisa por entregar/corregir este bug y no puedo perder tiempo testeando
-3. Mantener los tests lleva mucho tiempo y esfuerzo
-
----
-# Complicaciones técnicas para testear
-
-- Fabricación de datos de pruebas
-- Creación de objetos para inyectar dependencias/pasar por parámetro
-- Instanciación del objeto a testear
-- Verificación de los resultados
-
----
-# Soluciones técnicas para testear
-
-- Fabricación de datos de pruebas --> [Estamos solos]
-- Creación de objetos para inyectar/pasar por parámetro --> **[Mockito]**
-- Instanciación del objeto a testear --> [Spring Framework]
-- Verificación de los resultados --> **[Hamcrest]**
-
----
-# Mockito
-
-http://site.mockito.org/
-
-"Mockito es una librería para instanciar objetos
-a partir de tipos (clases/interfaces)
-y programar respuestas concretas
-cuando se llama a los métodos del objeto instanciado"
-`pom.xml`
-```xml
-<dependency>
-  <groupId>org.mockito</groupId>
-  <artifactId>mockito-core</artifactId>
-  <version>4.12</version>
-  <scope>test</scope>
-</dependency>
-```
----
-# Ejemplo: Login con Certificado digital
-```java
-public class LoginController {
-
-	private Connection connection;
-
-	public LoginController(Connection connection) {
-		this.connection = connection;
-	}
-
-	public boolean login(X509Certificate certificado) {
-		boolean resultado = false;
-		PreparedStatement prepareStatement = null;
-		ResultSet resultSet = null;
-
-			Principal subjectDN = certificado.getSubjectDN();
-			prepareStatement = connection.prepareStatement("SELECT count(*) FROM usuarios where login = ?");
-			prepareStatement.setString(1, subjectDN.getName());
-			resultSet = prepareStatement.executeQuery();
-			if (resultSet.next()) {
-				resultado = resultSet.getInt(1) > 0;
-			}
-    return resultado;
-}
-```
----
-# Ejemplo: Test sin Mockito
-- Tendría que tener un fichero con un Certificado de pruebas
-- Tendría que tener una BDD corriendo para obtener una Conexión
-```java
-@Test
-public void testLoginConCertificado() throws CertificateException {
-  // Preparar
-  byte[] certData = new byte[0];
-  X509Certificate certificado = X509Certificate.getInstance(certData);
-  Connection connection = null;
-
-  // Probar
-  LoginController controller = new LoginController(connection);
-  boolean login = controller.login(certificado);
-
-  // Verificar
-  assertTrue(login);
-}
-```
-- No tengo ninguna, en este caso fallaría el test
-
----
-# Ejemplo: Test con Mockito
-- No necesito un Certificado en fichero ni una BDD con datos de prueba
-- Mockito le dice a los objetos qué valores tienen que devolver
-
-```java
-@Test
-public void testLoginConCertificado() throws CertificateException, SQLException {
-  // Preparar
-  X509Certificate certificado = mock(X509Certificate.class);
-  Connection connection = mock(Connection.class);
-
-  // Programar respuestas
-  Principal principal = mock(Principal.class);
-  when(certificado.getSubjectDN()).thenReturn(principal);
-  when(principal.getName()).thenReturn("usuario");
-
-  PreparedStatement preparedStatement = mock(PreparedStatement.class);
-  when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
-  ResultSet resultSet = mock(ResultSet.class);
-  when(preparedStatement.executeQuery()).thenReturn(resultSet);
-  when(resultSet.next()).thenReturn(true);
-  when(resultSet.getInt(1)).thenReturn(1);
-
-  // Probar
-  LoginController controller = new LoginController(connection);
-  boolean login = controller.login(certificado);
-
-  // Verificar
-  assertTrue(login);
-}
-```
----
-# Cuestiones Filosóficas III
-¿Y si directamente _mockeo_ la clase LoginController?
-Este test pasa Ok!
-```java
-@Test
-public void testSinSentido() throws CertificateException {
-  // Probar
-  LoginController controller = mock(LoginController.class);
-  when(controller.login(null)).thenReturn(true);
-  boolean login = controller.login(null);
-
-  // Verificar
-  assertTrue(login);
-}
-
-```
----
-# Caja blanca vs caja negra
-.center[
-![](imgs/caja-blanca-caja-negra.png)
-]
----
-# Caja blanca: Peligro!
-- Los test de caja blanca tienen la desventaja de necesitar conocer
-los detalles de la implementación del código que prueban.
-- Esto implica directamente que al cambiar la implementación,
-el test romperá.
-- Es por ello que se habla de "fragilidad" de los tests de caja blanca.
-- Test frágiles === Mucho mantenimiento
-- Los test de caja blanca son propensos a **falsos positivos!**.
----
-# Caja blanca : Ejemplo de falso positivo
-Si cambio la SQL de LoginController:
-```java
-connection.prepareStatement("Quack!");
-```
-Este test con Mockito pasa OK:
-
-```java
-@Test
-public void testLoginConCertificado() throws CertificateException, SQLException {
-  ...
-  PreparedStatement preparedStatement = mock(PreparedStatement.class);
-  when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
-  ...
-  // Probar
-  LoginController controller = new LoginController(connection);
-  boolean login = controller.login(certificado);
-
-  // Verificar
-  assertTrue(login);
-}
-
-```
----
-# Verificación de Mocks
-- Mockito permite verificar que las llamadas que hemos programado se hayan realizado.
-- Juega el papel del **"assert"** para métodos que no devuelven nada (ej: insertar en BDD)
-- Sirve para minimizar el riesgo de falsos positivos.
----
-# Ejemplo: Verificación de Mocks
-.medium[
-```java
-public class TareaRepository {
-
-	private Connection connection;
-
-	public TareaRepository(Connection connection) {
-		this.connection = connection;
-	}
-
-	public void save(Tarea tarea) {
-		PreparedStatement prepareStatement = null;
-		try {
-			prepareStatement = connection.prepareStatement("INSERT INTO tareas VALUES (?)");
-			prepareStatement.setString(1, tarea.getNombre());
-*			prepareStatement.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (prepareStatement != null) {
-					prepareStatement.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+		String[] arrBien = idsBien.split(",");
+		if (subastaApi.ACCION_AGREGAR_BIEN.equals(accion)) {
+			String[] arrLotes = lotes.split(",");
+			subastaApi.agregarBienes(idSubasta, arrBien, arrLotes);
+		} else {
+			subastaApi.excluirBienes(idSubasta,arrBien);
 		}
-	}
-}
-```
-]
----
-# Ejemplo: Verificación de Mocks
-```java
-@Test
-public void testVerificarLaLlamadaAlMockDePreparedStatement() throws SQLException {
-  Tarea tarea = new Tarea("Aprender Mock.verify()");
-  Connection connection = mock(Connection.class);
-  PreparedStatement preparedStatement = mock(PreparedStatement.class);
-  when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
 
-  TareaRepository repository = new TareaRepository(connection);
-*  repository.save(tarea);
-
-  // Dado que save() no devuelve nada,
-  // uso mock.verify() para saber si se ha guardado la Tarea
-*  verify(preparedStatement).executeUpdate();
-}
-```
----
-# Ejemplo: Verificación de Mocks
-```java
-@Test
-public void testVerificarQueSeCierraLaConexionEnCasoDeError() throws SQLException {
-  Tarea tarea = new Tarea("Aprender Mock.verify()");
-  Connection connection = mock(Connection.class);
-  PreparedStatement preparedStatement = mock(PreparedStatement.class);
-  when(preparedStatement.executeUpdate())
-*    .thenThrow(new SQLException("Excepcion lanzada por Mockito de forma intencionada"));
-  when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
-
-  TareaRepository repository = new TareaRepository(connection);
-  repository.save(tarea);
-
-  // Puedo verificar llamadas a métodos que no he programado
-  verify(connection).close();
-  verify(preparedStatement).close();
-
-*  // Ejercicio: Estos asserts fallarían, ¿Por qué?
-  //assertTrue(connection.isClosed());
-  //assertTrue(preparedStatement.isClosed());
-
-}
-```
----
-# Mockito: Spies
-- Sirve para verificar llamadas a métodos de objetos "reales"
-
-Ejemplo:
-```java
-@Test
-public void testEspiarElMetodoGetNombreDeLaTarea() throws SQLException {
-  Tarea tarea = new Tarea("Aprender Mock.verify()");
-*  Tarea spy = spy(tarea);
-
-  Connection connection = mock(Connection.class);
-  PreparedStatement preparedStatement = mock(PreparedStatement.class);
-  when(preparedStatement.executeUpdate())
-    .thenThrow(new SQLException("Excepcion lanzada por Mockito de forma intencionada"));
-  when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
-
-  TareaRepository repository = new TareaRepository(connection);
-*  repository.save(spy);
-
-  // Verifico que el Repository ha consultado el nombre de la tarea
-  verify(spy).getNombre();
-}
-```
----
-# Propiedades deseables en una suite de pruebas
-## Siglas en inglés: FIRST
-- **F**ast: Que pasen rápido, **muy** rápido.
-- **I**ndependent: Que unos tests no impacten en otros.
-- **R**epeatable: Que un test no falle si lo paso más de una vez (bajo las mismas condiciones).
-- **S**elf-checking: Que no haya intervencion manual para verificar si un test pasa Ok.
-- **T**imely: Que estén escritos antes de que sea demasiado tarde.
----
-# Hamcrest
-
-Es una librería de **Matchers** que facilita verificar expectativas de un test.
-También produce mensajes de error más claros cuando una expectativa no se cumple.
-
-http://hamcrest.org/
-
-http://www.baeldung.com/java-junit-hamcrest-guide
-
-http://www.baeldung.com/hamcrest-collections-arrays
-
-`pom.xml`
-```xml
-<dependency>
-  <groupId>org.hamcrest</groupId>
-  <artifactId>hamcrest-all</artifactId>
-  <version>1.3</version>
-  <scope>test</scope>
-</dependency>
-```
----
-# Hamcrest: Ejemplos
-```java
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-public class HamcrestSimpleTest {
-
-	@Test
-	public void testComparacionTexto() {
-	    assertThat("El Principito", equalToIgnoringCase("el principito"));
+		return DEFAULT;
 	}
 
-	@Test
-	public void testColecciones() {
-		List<String> collection = Arrays.asList("ab", "cd", "ef");
-		assertThat(collection, hasItem("cd"));
-		assertThat(collection, not(hasItem("zz")));
-	}
+....
 
-	@Test
-	public void testComparacionDeNumerosDePuntoFlotante() {
-		// PI ~ 3 ± 0.2
-*    assertThat(Math.PI, closeTo(3, 0.2));
-	}
 }
 ```
 ---
-# Trivia
-.center[
-![](imgs/pi-es-exactamente-3.png)
-]
----
-# Hamcrest: JSON
-
-https://github.com/json-path/JsonPath
-
-`pom.xml`
-```xml
-<dependency>
-    <groupId>com.jayway.jsonpath</groupId>
-    <artifactId>json-path-assert</artifactId>
-    <version>2.2.0</version>
-</dependency>
-```
----
-# Hamcrest: JSON
-
-Dado el siguiente JSON:
-
-```json
-{
-  "message": "Hi there",
-  "quantity": 5,
-  "price": 34.56,
-  "store": {
-    "book": [
-      {
-        "author": "Evelyn Waugh"
-      }
-    ]
-  }
-}
-```
----
-# Hamcrest: JSON
-
-Podemos verificar sus propiedades con Hamcrest:
-
+# SubastaManager
+https://gist.github.com/mefernandez/88db27e61f666feb8117b87c3cea9762
 ```java
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
+@SuppressWarnings("deprecation")
+@Service("subastaManager")
+public class SubastaManager implements SubastaApi {
 
-public class HamcrestJSONTest {
+	@Autowired
+	private ApiProxyFactory proxyFactory;
 
-	@Test
-	public void testVerificarJSON() {
-		String json = "{ message: 'Hi there', quantity: 5, price: 34.56, store: { book: [ {author: 'Evelyn Waugh'}] }}";
-		// Verify evaluation of JSON path
-		assertThat(json, hasJsonPath("$.message", equalTo("Hi there")));
-		assertThat(json, hasJsonPath("$.quantity", equalTo(5)));
-		assertThat(json, hasJsonPath("$.price", equalTo(34.56)));
-		assertThat(json, hasJsonPath("$.store.book[*].author", hasItem("Evelyn Waugh")));
-	}
+	@Autowired
+	private GenericABMDao genericDao;
 
-}
-```
----
-# JaCoCo
-https://github.com/jacoco/jacoco
+	@Autowired
+	private SubastaDao subastaDao;
 
-Configuración en Maven:
-.small[
-```xml
-<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacoco.version}</version>
-				<executions>
-					<execution>
-						<id>prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>post-unit-test</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-						<configuration>
-							<!-- Sets the path to the file which contains the execution data. -->
+	@Autowired
+	private OficinaDao oficinaDao;
 
-							<dataFile>target/jacoco.exec</dataFile>
-							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>target/jacoco-ut</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
-					<systemPropertyVariables>
-						<jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
-					</systemPropertyVariables>
-				</configuration>
-			</plugin>
-```
-]
----
-# JaCoCo
+	@Autowired
+	private NMBBienDao nmbBienDao;
 
-Ejecución con maven:
-```
-mvn test
-```
-Ejecución con Eclipse (a través de Maven):
-```
-Sobre el proyecto --> botón derecho --> Run As --> maven test
-```
-Informes de Cobertura:
-```
-target/jacoco-ut/index.html
-```
-**NOTA**: JaCoCo sólo genera los informes si todos los tests pasan OK.
----
-# Cobertura
-#
-.center[
-"La cobertura de un código base se refiere
+	@Autowired
+	private Executor executor;
 
-a las líneas de código que han sido ejecutadas
+	@Resource
+	private Properties appProperties;
 
-como resultado de pasar los tests."
-]
----
-# Demo: Cobertura
-```java
-public class Direccion {
+....
 
-	private String direccion;
+	@Override
+	@Transactional(readOnly = false)
+	public void guardaInstruccionesLoteSubasta(GuardarInstruccionesDto dto) {
+		LoteSubasta loteSubasta = this.getLoteSubasta(Long.parseLong(dto.getIdLote()));
 
-	public Direccion(String direccion) {
-		this.direccion = direccion;
-	}
+		if (!Checks.esNulo(loteSubasta)) {
+			loteSubasta.setInsPujaSinPostores(Checks.esNulo(dto.getPujaSinPostores()) ? null : Float.parseFloat(dto.getPujaSinPostores()));
+			loteSubasta.setInsPujaPostoresDesde(Checks.esNulo(dto.getPujaPostoresDesde()) ? null : Float.parseFloat(dto.getPujaPostoresDesde()));
+			loteSubasta.setInsPujaPostoresHasta(Checks.esNulo(dto.getPujaPostoresHasta()) ? null : Float.parseFloat(dto.getPujaPostoresHasta()));
+			loteSubasta.setInsValorSubasta(Checks.esNulo(dto.getValorSubasta()) ? null : Float.parseFloat(dto.getValorSubasta()));
+			loteSubasta.setIns50DelTipoSubasta(Checks.esNulo(dto.getTipoSubasta50()) ? null : Float.parseFloat(dto.getTipoSubasta50()));
+			loteSubasta.setIns60DelTipoSubasta(Checks.esNulo(dto.getTipoSubasta60()) ? null : Float.parseFloat(dto.getTipoSubasta60()));
+			loteSubasta.setIns70DelTipoSubasta(Checks.esNulo(dto.getTipoSubasta70()) ? null : Float.parseFloat(dto.getTipoSubasta70()));
+			loteSubasta.setObservaciones(Checks.esNulo(dto.getObservaciones()) ? null : HtmlUtils.htmlUnescape(dto.getObservaciones()));
+			if (!Checks.esNulo(dto.getRiesgoConsignacion())) {
+				DDSiNo sino = (DDSiNo)diccionarioApi.dameValorDiccionarioByCod(DDSiNo.class, dto.getRiesgoConsignacion());
+				loteSubasta.setRiesgoConsignacion(sino!=null && DDSiNo.SI.equals(sino.getCodigo()));
+			}
+			loteSubasta.setDeudaJudicial(Checks.esNulo(dto.getDeudaJudicial()) ? null : Float.parseFloat(dto.getDeudaJudicial()));
+			genericDao.update(LoteSubasta.class, loteSubasta);
 
-	public String getCodigoPostal() {
-		Pattern pattern = Pattern.compile("[0-9]{5}");
-		Matcher matcher = pattern.matcher(this.direccion);
-		if (matcher.find()) {
-			return matcher.group();
+			//Calculamos el tipo de subasta en este momento
+			subastaProcedimientoApi.determinarTipoSubasta(loteSubasta.getSubasta());  // <<<<<<<<< Este método cambia el estado de la subasta según los valores actuales.
 		}
-		return null;
+
 	}
+
+...
 
 }
-```
 
----
-# Demo: Cobertura
-```java
-public class CoberturaTest {
-
-	@Test
-	public void obtenerCodigoPostal() {
-		Direccion direccion = new Direccion("Calle Vicente Barrera Cambra 6 bajo (46020)");
-		String codigoPostal = direccion.getCodigoPostal();
-		assertEquals("46020", codigoPostal);
-	}
-
-	@Test
-	public void noHayCodigoPostal() {
-		Direccion direccion = new Direccion("Calle Vicente Barrera Cambra 6 bajo");
-		String codigoPostal = direccion.getCodigoPostal();
-		assertNull(codigoPostal);
-	}
-
-}
 ```
 ---
-# JaCoco
-Informe de cobertura de la clase Direccion:
-
-![](imgs/jacoco-cien-por-cien.png)
----
- # Cuestiones filosóficas IV
- .center[
- ![](imgs/philosoraptor-2.jpg)
- ]
----
-# Contraejemplo:
-
-## 100% cobertura != código libre de fallos
-
-```java
-public class Calculadora {
-
-	public static int dividir(int a, int b) {
-		return a / b;
-	}
-
-}
-
-public class CienPorCienCoberturaConErroresTest {
-
-	@Test
-	public void esteTestCubreElCienPorCienDeLaClaseCalculadora() {
-		assertEquals(2, Calculadora.dividir(4, 2));
-	}
-
-	@Test
-	public void sinEmbargoEsteTestLanzaArithmeticExceptionAlDividirPorCero() {
-*		assertEquals(2, Calculadora.dividir(4, 0));
-	}
-}
-```
----
-# Extra: Granularidad de los Test
-
-## Unitarios:
-
-Prueban una "unidad" del sistema, sin dependencias de otros módulos.
-
-## De Integración:
-
-Prueban la integración de una parte del código base con otro módulo o sistema.
-El ejemplo más típico es código que actúa contra la base de datos.
-
----
-# Extra: Granularidad de los Test
-
-- Idealmente, la mayoría de los tests deben ser **unitarios**.
-- Los test de integración _tienden_ a ser lentos o requerir de un entorno
-más elaborado.
-- Los tests unitarios _deben_ ser rápidos porque se _deben_ ejecutar constantemente.
-
-.center[
-![](imgs/test-pyramid.png)
+# Spring 2.5.x (Release: 2007)
+.toc[
+![](imgs/bttf.jpg)
 ]
 ---
-# JUnit: Categorías de Tests
-
-La anotación @Category asocia un Test a un grupo
-que luego se puede ejecutar individualmente.
-
-```java
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-
-@Category(TestDeIntegracion.class)
-public class CategoriaIntegracionTest {
-
-	@Test
-	public void test() {
-		System.out.println("Soy un test de integracion");
-	}
-
-}
-```
-
-Donde `TestDeIntegracion` es una clase/interfaz arbitraria que sive como "marcador".
-```java
-public interface TestDeIntegracion {
-
-}
-```
-
----
-# JUnit: Categorías de Tests
-
-Lanzar exclusivamente los test de **integración** con Maven:
-```
-maven test -Dgroups=com.geekshubsacademy.junit.v8.TestDeIntegracion
-```
-Lanzar exclusivamente los test **unitarios** con Maven:
-```
-maven test -DexcludedGroups=com.geekshubsacademy.junit.v8.TestDeIntegracion
-```
-
----
-# JUnit: Rules
-
-Reglas añaden comportamiento al Test de forma general.
-JUnit viene con algunas reglas predefinidas.
-
-También hay librerías que añaden nuevas reglas.
-
-Ejemplo: System Rules
-
-http://stefanbirkner.github.io/system-rules/
-
-`pom.xml`
-```xml
-<dependency>
-  <groupId>com.github.stefanbirkner</groupId>
-  <artifactId>system-rules</artifactId>
-  <version>1.16.0</version>
-  <scope>test</scope>
-</dependency>
-```
-
----
-# JUnit: Rules
-
-Este test comprueba si se ha escrito un determinado `String` al `System.output`:
-
-```java
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
-
-public class RulesTest {
-	@Rule
-	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
-
-	@Test
-	public void capturaSystemOut() {
-		System.out.print("hello world");
-		assertEquals("hello world", systemOutRule.getLog());
-	}
-}
-```
----
-# JUnit: Timeout
-
-JUnit permite definir un timeout para los tests,
-de tal forma que el test fallará si excede el timeout indicado.
-
-```java
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.Timeout;
-
-public class TimeoutTest {
-
-	@Rule
-    public Timeout globalTimeout = Timeout.millis(500);
-
-    @Test
-    public void testFallaPorqueExcedeElTimeoutGlobalDeLaRegla() throws Exception {
-        TimeUnit.SECONDS.sleep(1); // sleep for 100 seconds
-    }
-
-    @Test(timeout = 200)
-    public void testFallaPorqueExcedeElTimeoutIndicadoEnLaAnotacionTest() throws Exception {
-        TimeUnit.SECONDS.sleep(1); // sleep for 100 seconds
-    }
-}
-```
----
-# Mockito: Argument Captor
-
-Permite recuperar un parámetro que se le haya pasado al mock
-mediante una llamada a método durante el test.
-
-Ejemplo:
-
-```java
-public class MockitoArgumentCaptorTest {
-
-	@Test
-	public void test() {
-		List<String> lista = mock(List.class);
-		lista.add("Hola");
-		lista.add("Mundo");
-
-		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-*		verify(lista, times(2)).add(captor.capture());
-		assertThat(captor.getAllValues(), containsInAnyOrder("Hola", "Mundo"));
-	}
-
-}
-```
----
-# TDD: Test Driven Development
-
-"TDD es una técnica de desarrollo de software
-que consiste fundamentalmente
-en escribir el test **antes** que el código"
-
-## Ciclo de vida Red-Green-Refactor
-1. Red: Escribir un test que falle (ya que el código no está escrito)
-2. Green: Escribir el mínimo código que haga pasar el test
-3. Refactor: Mejorar la implementación del código sin romper el test
-4. Repetir
-
-## Implicaciones
-- Hay que tener claras las pruebas que escribir antes de empezar
-- El código va tomando forma a imagen y semejanza de los tests
----
-# Ejemplo TDD: Diseño de un validador de letra de DNI.
-
-Especificación:
-
-http://www.interior.gob.es/web/servicios-al-ciudadano/dni/calculo-del-digito-de-control-del-nif-nie
-
-> "Para verificar el NIF de españoles residentes mayores de edad, el algoritmo de cálculo del dígito de control es el siguiente:
-Se divide el número entre 23 y el resto se sustituye por una letra que se determina por inspección mediante la siguiente tabla:
-
-|RESTO|	0|	1|	2|	3|	4|	5|	6|	7|	8|	9|	10|	11|
-|-----|--|---|---|---|---|---|---|---|---|---|----|---|
-|LETRA|	T|	R|	W|	A|	G|	M|	Y|	F|	P|	D|	X|	B|
-
-|RESTO| 12| 13| 14| 15| 16| 17| 18| 19| 20| 21| 22|
-|-----|---|---|---|---|---|---|---|---|---|---|---|
-|LETRA|	N|	J|	Z|	S|	Q|	V|	H|	L|	C|	K|	E|
-
-
----
-# Ejemplo TDD
-
-## Paso 1: Red
-
-```java
-public class ValidadorDNITest {
-
-	@Test
-	public void lasPrimeras8PosicionesDebeSerDigitos() {
-		assertTrue(ValidadorDNI.validar("12345678Z"));
-	}
-
-}
-```
-
-```java
-public class ValidadorDNI {
-
-	public static boolean validar(String string) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-}
-```
----
-# Ejemplo TDD
-
-## Paso 1: Red
-.center[
-![](imgs/tdd-red.png)
+# Agenda (Tareas):
+.toc[
+1. Montar proyecto con Spring Boot 1.5.9 (Spring 4.2)
+2. Crear Test Unitario para SubastaController
+3. Separar Tests Unitarios de Tests de Integración
+4. Usar de Mockito
+5. Configurar JaCoCo
+6. Probar capa web de SubastaController
+7. Refactorizar SubastaController
 ]
 ---
-# Ejemplo TDD
+# Montar proyecto con Spring Boot 1.5.9 (Spring 4.2)
 
-## Paso 2: Green
-
-```java
-public class ValidadorDNI {
-
-	public static boolean validar(String string) {
-*		return true;
-	}
-
-}
-```
-.center[
-![](imgs/tdd-green.png)
-]
----
-# Ejemplo TDD
-
-## Paso 3: Refactor
-
-```java
-public class ValidadorDNI {
-
-*	public static boolean validar(String dni) {
-		return true;
-	}
-
-}
-```
-
----
-# Reto TDD
-
-"Desarrollar una clase Sudoku que permita rellenarlo
-y verificar si es una solución válida"
-
-Pista: Es útil contar con un generado de Sudokus
-
-http://www.sudoku-online.org/
-
-
----
-# Reto Testing
-
-## Enunciado
-En el proyecto existe una clase Tarea que se guarda en base de datos
-mediante la clase TareaRepository.
-
-## Objetivo
-Escribir un test que compruebe que efectivamente la tarea
-se guarda con la fecha y hora actual.
-
-- Nivel fácil: se puede modificar la clase Tarea ni TareaRepository
-- Nivel difícil: no se puede modificar la clase Tarea ni TareaRepository
+1. Abrir Eclipse
+2. Descargar un proyecto Spring prototipo
+http://start.spring.io/
+![](imgs/spring-starter.png)
+3.
+3. Importar en Eclipse
+4. Copiar y pegar la clase SubastaController
+5. Testear el método `guardarAgregarExcluirBien`
 
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">

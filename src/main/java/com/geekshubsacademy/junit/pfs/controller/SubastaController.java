@@ -25,7 +25,7 @@ public class SubastaController {
 
 
 	@SuppressWarnings("static-access")
-	@RequestMapping
+	@RequestMapping("/guardarAgregarExcluirBien")
 	public String guardarAgregarExcluirBien(
 			@RequestParam(value = "idSubasta", required = true) Long idSubasta,
 			@RequestParam(value = "idsBien", required = true) String idsBien,
@@ -44,6 +44,17 @@ public class SubastaController {
 		return DEFAULT;
 	}
 
+	@RequestMapping("/agregarBien")
+	public String agregarBien(
+			@RequestParam(value = "idSubasta", required = true) Long idSubasta,
+			@RequestParam(value = "idsBien", required = true) String[] arrBien,
+			@RequestParam(value = "lotes", required = false) String[] arrLotes) {
+		
+			subastaApi.agregarBienes(idSubasta, arrBien, arrLotes);
+		
+		return DEFAULT;
+	}
+	
 	public SubastaApi getSubastaApi() {
 		return subastaApi;
 	}
