@@ -1,17 +1,18 @@
 package com.geekshubsacademy.junit.pfs.manager;
 
-import java.util.Properties;
-import java.util.concurrent.Executor;
-
-import javax.annotation.Resource;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @SuppressWarnings("deprecation")
 @Service("subastaManager")
+@Getter
+@Setter
 public class SubastaManager implements SubastaApi {
 	
 //	@Autowired
@@ -69,9 +70,8 @@ public class SubastaManager implements SubastaApi {
 	}
 
 
-	private LoteSubasta getLoteSubasta(long parseLong) {
-		// TODO Auto-generated method stub
-		return null;
+	private LoteSubasta getLoteSubasta(long idLote) {
+		return genericDao.find(LoteSubasta.class, idLote);
 	}
 
 
