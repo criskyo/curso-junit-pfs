@@ -237,6 +237,35 @@ http://start.spring.io/
 3. Importar en Eclipse
 4. Copiar y pegar la clase SubastaController
 5. Testear el método `guardarAgregarExcluirBien`
+---
+# Spring 2.5
+
+```
+git checkout spring25
+```
+---
+# Spring 2.5
+`org.springframework.core.JdkVersion`
+
+```
+static {
+  javaVersion = System.getProperty("java.version");
+  // version String should look like "1.4.2_10"
+  if (javaVersion.indexOf("1.7.") != -1) {
+    majorJavaVersion = JAVA_17;
+  }
+  else if (javaVersion.indexOf("1.6.") != -1) {
+    majorJavaVersion = JAVA_16;
+  }
+  else if (javaVersion.indexOf("1.5.") != -1) {
+    majorJavaVersion = JAVA_15;
+  }
+  else {
+    // else leave 1.4 as default (it's either 1.4 or unknown)
+    majorJavaVersion = JAVA_14;
+  }
+}
+```
 
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">

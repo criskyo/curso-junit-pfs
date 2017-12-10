@@ -28,7 +28,7 @@ import com.geekshubsacademy.junit.pfs.controller.SubastaController;
 //@WebMvcTest(SubastaController.class)
 @RunWith(SpringJUnit4ClassRunner.class)
 @Category(TestDeIntegracion.class)
-@ContextConfiguration
+@ContextConfiguration(locations = "classpath:/spring-context.xml")
 public class SubastaControllerMockMvcTest {
 	
 //    @Autowired
