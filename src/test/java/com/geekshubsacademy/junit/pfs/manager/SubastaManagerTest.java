@@ -2,19 +2,10 @@ package com.geekshubsacademy.junit.pfs.manager;
 
 import static org.junit.Assert.*;
 
-import javax.persistence.EntityManager;
-
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
 public class SubastaManagerTest {
 	
 	@Test
@@ -38,7 +29,7 @@ public class SubastaManagerTest {
 		
 		// Assert
 		ArgumentCaptor<LoteSubasta> captor = ArgumentCaptor.forClass(LoteSubasta.class);
-		verify(dao).update(any(), captor.capture());
+		verify(dao).update(any(Class.class), captor.capture());
 		assertEquals("Observaciones", captor.getValue().getObservaciones());
 	}
 
