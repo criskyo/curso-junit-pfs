@@ -225,19 +225,60 @@ public class SubastaManager implements SubastaApi {
 5. Configurar JaCoCo
 6. Probar capa web de SubastaController
 7. Refactorizar SubastaController
+8. Probar capa DAO de SubastaManager
+9. Downgrade a Spring Framework 2.5
 ]
 ---
-# Montar proyecto con Spring Boot 1.5.9 (Spring 4.2)
+# Montar proyecto con Spring Boot 1.5.9
 
 1. Abrir Eclipse
 2. Descargar un proyecto Spring prototipo
 http://start.spring.io/
 ![](imgs/spring-starter.png)
-3.
 3. Importar en Eclipse
+
+![](imgs/eclipse-import-maven-project.png)
+
 4. Copiar y pegar la clase SubastaController
 5. Testear el método `guardarAgregarExcluirBien`
+---
+# Spring 2.5
+.toc[
+![](imgs/rain.gif)
 
+git checkout spring25
+
+]
+---
+# Spring 2.5
+`org.springframework.core.JdkVersion`
+
+```
+static {
+  javaVersion = System.getProperty("java.version");
+  // version String should look like "1.4.2_10"
+  if (javaVersion.indexOf("1.7.") != -1) {
+    majorJavaVersion = JAVA_17;
+  }
+  else if (javaVersion.indexOf("1.6.") != -1) {
+    majorJavaVersion = JAVA_16;
+  }
+  else if (javaVersion.indexOf("1.5.") != -1) {
+    majorJavaVersion = JAVA_15;
+  }
+  else {
+    // else leave 1.4 as default (it's either 1.4 or unknown)
+    majorJavaVersion = JAVA_14;
+  }
+}
+```
+---
+# TDD
+.toc[
+"Diseñar siguiendo el método TDD un validador de LoteSubasta"
+
+"El validador debe darme una lista de todos los errores que puedan surgir."
+]
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
