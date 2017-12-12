@@ -1,5 +1,7 @@
 package com.geekshubsacademy.junit.pfs.manager;
 
+import java.util.Date;
+
 //import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,13 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.HtmlUtils;
 
-import lombok.Getter;
-import lombok.Setter;
-
 @SuppressWarnings("deprecation")
 @Service("subastaManager")
-@Getter
-@Setter
 public class SubastaManager implements SubastaApi {
 	
 //	@Autowired
@@ -37,6 +34,30 @@ public class SubastaManager implements SubastaApi {
 //	@Resource
 //	private Properties appProperties;
 	
+	public GenericABMDao getGenericDao() {
+		return genericDao;
+	}
+
+	public void setGenericDao(GenericABMDao genericDao) {
+		this.genericDao = genericDao;
+	}
+
+	public DiccionarioApi getDiccionarioApi() {
+		return diccionarioApi;
+	}
+
+	public void setDiccionarioApi(DiccionarioApi diccionarioApi) {
+		this.diccionarioApi = diccionarioApi;
+	}
+
+	public SubastaProcedimientoApi getSubastaProcedimientoApi() {
+		return subastaProcedimientoApi;
+	}
+
+	public void setSubastaProcedimientoApi(SubastaProcedimientoApi subastaProcedimientoApi) {
+		this.subastaProcedimientoApi = subastaProcedimientoApi;
+	}
+
 	DiccionarioApi diccionarioApi;
 
 	private SubastaProcedimientoApi subastaProcedimientoApi;
@@ -62,6 +83,11 @@ public class SubastaManager implements SubastaApi {
 				loteSubasta.setRiesgoConsignacion(sino!=null && DDSiNo.SI.equals(sino.getCodigo()));
 			}
 			loteSubasta.setDeudaJudicial(Checks.esNulo(dto.getDeudaJudicial()) ? null : Float.parseFloat(dto.getDeudaJudicial()));
+			/* Antención: Trampas */
+			loteSubasta.setFechaEstado(new Date());
+			int count = genericDao.selectCount("SELECT COUNT(*) FROM lotesubasta");
+			loteSubasta.setCountSubastas(count);
+			/* Antención: FIN Trampas */
 			genericDao.update(LoteSubasta.class, loteSubasta);
 			
 			//Calculamos el tipo de subasta en este momento
@@ -69,7 +95,6 @@ public class SubastaManager implements SubastaApi {
 		}
 
 	}
-
 
 	private LoteSubasta getLoteSubasta(long idLote) {
 		return genericDao.find(LoteSubasta.class, idLote);

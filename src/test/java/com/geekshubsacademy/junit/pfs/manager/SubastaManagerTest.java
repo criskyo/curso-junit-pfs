@@ -3,22 +3,30 @@ package com.geekshubsacademy.junit.pfs.manager;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
 import static org.mockito.Mockito.*;
 
+@RunWith(MockitoJUnitRunner.class)
 public class SubastaManagerTest {
 	
+	@InjectMocks
+	private SubastaManager manager;
+	
+	@Mock
+	private SubastaProcedimientoApi api;
+
+	@Mock
+	private GenericABMDao dao;
+
 	@Test
 	public void testActualizarLoteConObservaciones() throws Exception {
-		// Setup
-		SubastaManager manager = new SubastaManager();
-		
-		SubastaProcedimientoApi api = mock(SubastaProcedimientoApi.class);
-		manager.setSubastaProcedimientoApi(api);
-		
-		GenericABMDao dao = mock(GenericABMDao.class);
+		// Preparar
 		when(dao.find(LoteSubasta.class, new Long(1L))).thenReturn(new LoteSubasta());
-		manager.setGenericDao(dao);
 		
 		GuardarInstruccionesDto dto = new GuardarInstruccionesDto();
 		dto.setIdLote("1");
