@@ -38,7 +38,7 @@ public class SubastaManagerTest {
 		
 		// Assert
 		ArgumentCaptor<LoteSubasta> captor = ArgumentCaptor.forClass(LoteSubasta.class);
-		verify(dao).update(any(), captor.capture());
+		verify(dao).update(any(Class.class), captor.capture());
 		assertEquals("Observaciones", captor.getValue().getObservaciones());
 	}
 

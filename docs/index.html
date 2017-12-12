@@ -86,18 +86,19 @@ background-image: url(imgs/bg.jpg)
 ---
 # Qué vamos a hacer en el curso
 .toc[
-- Testear 2 clases:
+- Crear Tests Unitarios de:
   - SubastaController
   - SubastaManager
-- Tipos de Test:
-  - Unitarios
-  - Integración:
-    - @SpringBootTest
-    - @WebMvcTest (MockMvc)
-    - @DataJpaTest
 - Refactorizar
-- Configurar JaCoCo
 - TDD
+]
+---
+# 1. Importar proyecto en Eclipse
+.toc[
+
+- Descargar  
+- Importar como proyecto Maven
+- NOTA: Necesita JDK7 o JDK8
 ]
 ---
 # SubastaController
@@ -147,6 +148,10 @@ public class SubastaController {
 
 }
 ```
+---
+.toc[
+Crear un **test unitario** para la clase `SubastaController`.
+]
 ---
 # SubastaManager
 https://gist.github.com/mefernandez/88db27e61f666feb8117b87c3cea9762
@@ -211,71 +216,9 @@ public class SubastaManager implements SubastaApi {
 
 ```
 ---
-# Spring 2.5.x (Release: 2007)
-.toc[
-![](imgs/bttf.jpg)
-]
----
-# Agenda (Tareas):
-.toc[
-1. Montar proyecto con Spring Boot 1.5.9 (Spring 4.2)
-2. Crear Test Unitario para SubastaController
-3. Separar Tests Unitarios de Tests de Integración
-4. Usar de Mockito
-5. Configurar JaCoCo
-6. Probar capa web de SubastaController
-7. Refactorizar SubastaController
-8. Probar capa DAO de SubastaManager
-9. Downgrade a Spring Framework 2.5
-]
----
-# Montar proyecto con Spring Boot 1.5.9
-
-1. Abrir Eclipse
-2. Descargar un proyecto Spring prototipo
-http://start.spring.io/
-![](imgs/spring-starter.png)
-3. Importar en Eclipse
-
-![](imgs/eclipse-import-maven-project.png)
-
-4. Copiar y pegar la clase SubastaController
-5. Testear el método `guardarAgregarExcluirBien`
----
-# Spring 2.5
-.toc[
-![](imgs/rain.gif)
-
-git checkout spring25
-
-]
----
-# Spring 2.5
-`org.springframework.core.JdkVersion`
-
-```
-static {
-  javaVersion = System.getProperty("java.version");
-  // version String should look like "1.4.2_10"
-  if (javaVersion.indexOf("1.7.") != -1) {
-    majorJavaVersion = JAVA_17;
-  }
-  else if (javaVersion.indexOf("1.6.") != -1) {
-    majorJavaVersion = JAVA_16;
-  }
-  else if (javaVersion.indexOf("1.5.") != -1) {
-    majorJavaVersion = JAVA_15;
-  }
-  else {
-    // else leave 1.4 as default (it's either 1.4 or unknown)
-    majorJavaVersion = JAVA_14;
-  }
-}
-```
----
 # TDD
 .toc[
-"Diseñar siguiendo el método TDD un validador de LoteSubasta"
+"Diseñar siguiendo el método TDD un **Validador** de `LoteSubasta`"
 
 "El validador debe darme una lista de todos los errores que puedan surgir."
 ]
