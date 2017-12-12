@@ -89,17 +89,23 @@ background-image: url(imgs/bg.jpg)
 - Crear Tests Unitarios de:
   - SubastaController
   - SubastaManager
+- Ver cobertura con JaCoCo
+- Ver un ejemplo de Test de Integración
 - Refactorizar
 - TDD
 ]
 ---
-# 1. Importar proyecto en Eclipse
-.toc[
+# Importar proyecto en Eclipse
+- Descargar el proyecto base:
 
-- Descargar  
-- Importar como proyecto Maven
+https://github.com/mefernandez/curso-junit-pfs/archive/spring25-base.zip
+
+- Descomprimir el ZIP en una carpeta
+ 
+- Importar la carpeta como proyecto Maven
+
 - NOTA: Necesita JDK7 o JDK8
-]
+
 ---
 # SubastaController
 https://gist.github.com/mefernandez/88db27e61f666feb8117b87c3cea9762
@@ -153,74 +159,30 @@ public class SubastaController {
 Crear un **test unitario** para la clase `SubastaController`.
 ]
 ---
-# SubastaManager
-https://gist.github.com/mefernandez/88db27e61f666feb8117b87c3cea9762
-```java
-@SuppressWarnings("deprecation")
-@Service("subastaManager")
-public class SubastaManager implements SubastaApi {
-
-	@Autowired
-	private ApiProxyFactory proxyFactory;
-
-	@Autowired
-	private GenericABMDao genericDao;
-
-	@Autowired
-	private SubastaDao subastaDao;
-
-	@Autowired
-	private OficinaDao oficinaDao;
-
-	@Autowired
-	private NMBBienDao nmbBienDao;
-
-	@Autowired
-	private Executor executor;
-
-	@Resource
-	private Properties appProperties;
-
-....
-
-	@Override
-	@Transactional(readOnly = false)
-	public void guardaInstruccionesLoteSubasta(GuardarInstruccionesDto dto) {
-		LoteSubasta loteSubasta = this.getLoteSubasta(Long.parseLong(dto.getIdLote()));
-
-		if (!Checks.esNulo(loteSubasta)) {
-			loteSubasta.setInsPujaSinPostores(Checks.esNulo(dto.getPujaSinPostores()) ? null : Float.parseFloat(dto.getPujaSinPostores()));
-			loteSubasta.setInsPujaPostoresDesde(Checks.esNulo(dto.getPujaPostoresDesde()) ? null : Float.parseFloat(dto.getPujaPostoresDesde()));
-			loteSubasta.setInsPujaPostoresHasta(Checks.esNulo(dto.getPujaPostoresHasta()) ? null : Float.parseFloat(dto.getPujaPostoresHasta()));
-			loteSubasta.setInsValorSubasta(Checks.esNulo(dto.getValorSubasta()) ? null : Float.parseFloat(dto.getValorSubasta()));
-			loteSubasta.setIns50DelTipoSubasta(Checks.esNulo(dto.getTipoSubasta50()) ? null : Float.parseFloat(dto.getTipoSubasta50()));
-			loteSubasta.setIns60DelTipoSubasta(Checks.esNulo(dto.getTipoSubasta60()) ? null : Float.parseFloat(dto.getTipoSubasta60()));
-			loteSubasta.setIns70DelTipoSubasta(Checks.esNulo(dto.getTipoSubasta70()) ? null : Float.parseFloat(dto.getTipoSubasta70()));
-			loteSubasta.setObservaciones(Checks.esNulo(dto.getObservaciones()) ? null : HtmlUtils.htmlUnescape(dto.getObservaciones()));
-			if (!Checks.esNulo(dto.getRiesgoConsignacion())) {
-				DDSiNo sino = (DDSiNo)diccionarioApi.dameValorDiccionarioByCod(DDSiNo.class, dto.getRiesgoConsignacion());
-				loteSubasta.setRiesgoConsignacion(sino!=null && DDSiNo.SI.equals(sino.getCodigo()));
-			}
-			loteSubasta.setDeudaJudicial(Checks.esNulo(dto.getDeudaJudicial()) ? null : Float.parseFloat(dto.getDeudaJudicial()));
-			genericDao.update(LoteSubasta.class, loteSubasta);
-
-			//Calculamos el tipo de subasta en este momento
-			subastaProcedimientoApi.determinarTipoSubasta(loteSubasta.getSubasta());  // <<<<<<<<< Este método cambia el estado de la subasta según los valores actuales.
-		}
-
-	}
-
-...
-
-}
-
-```
+.toc[
+Lograr un 100% de Cobertura con JaCoCo.
+]
+---
+.toc[
+Crear un **test unitario** para la clase `SubastaManager`.
+]
+---
+.toc[
+DEMO: Test de Integración con Hibernate
+]
 ---
 # TDD
 .toc[
 "Diseñar siguiendo el método TDD un **Validador** de `LoteSubasta`"
 
-"El validador debe darme una lista de todos los errores que puedan surgir."
+"El validador debe darme **una lista de todos los errores** que puedan surgir."
+
+Un LoteSubasta debe cumplir:
+
+1. El ID de LoteSubasta es obligatorio 
+2. La PujaPostoresDesde <= PujaPostoresHasta
+3. ValorSubasta > 0 
+
 ]
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
